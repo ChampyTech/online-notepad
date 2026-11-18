@@ -40,6 +40,169 @@
             background: rgba(148, 163, 184, 0.65);
         }
 
+        /* Shared typography controls */
+        .font-select-wrap {
+            position: relative;
+        }
+        .font-select-wrap::after {
+            content: "";
+            position: absolute;
+            right: 0.65rem;
+            top: 50%;
+            width: 0.35rem;
+            height: 0.35rem;
+            border-right: 1.5px solid currentColor;
+            border-bottom: 1.5px solid currentColor;
+            transform: translateY(-70%) rotate(45deg);
+            pointer-events: none;
+            color: #94a3b8;
+        }
+        .font-select {
+            width: 100%;
+            height: 26px;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            color: #334155;
+            cursor: pointer;
+            font-size: 0.75rem;
+            line-height: 1.25;
+            padding: 0.2rem 1.85rem 0.2rem 0.65rem;
+            transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+        }
+        .font-select:hover {
+            border-color: #a5b4fc;
+            background: #ffffff;
+        }
+        .font-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+        }
+        .font-select option {
+            background: #ffffff;
+            color: #334155;
+        }
+        .dark .font-select {
+            border-color: #475569;
+            background: rgba(30, 41, 59, 0.95);
+            color: #e2e8f0;
+        }
+        .dark .font-select:hover {
+            border-color: #818cf8;
+            background: #1e293b;
+        }
+        .dark .font-select:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.16);
+        }
+        .dark .font-select option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        @keyframes menu-enter {
+            from { opacity: 0; transform: translateY(-6px) scale(0.985); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes panel-enter {
+            from { opacity: 0; transform: translateY(-8px) scale(0.975); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes modal-enter {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes modal-panel-enter {
+            from { opacity: 0; transform: translateY(10px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .menu-dropdown:not(.hidden) {
+            transform-origin: top left;
+            animation: menu-enter 150ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #find-popup:not(.hidden) {
+            transform-origin: top right;
+            animation: panel-enter 180ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        [id$="-modal"]:not(.hidden) {
+            animation: modal-enter 120ms ease-out;
+        }
+        [id$="-modal"]:not(.hidden) > div {
+            animation: modal-panel-enter 180ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .menu-dropdown:not(.hidden),
+            #find-popup:not(.hidden),
+            [id$="-modal"]:not(.hidden),
+            [id$="-modal"]:not(.hidden) > div {
+                animation: none;
+            }
+        }
+
+        .line-height-range {
+            width: 100%;
+            height: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        .line-height-range::-webkit-slider-runnable-track {
+            height: 5px;
+            border-radius: 9999px;
+            background: #e2e8f0;
+        }
+        .line-height-range::-webkit-slider-thumb {
+            width: 14px;
+            height: 14px;
+            margin-top: -4.5px;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 2px solid #ffffff;
+            border-radius: 9999px;
+            background: #6366f1;
+            box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
+        }
+        .line-height-range::-moz-range-track {
+            height: 5px;
+            border-radius: 9999px;
+            background: #e2e8f0;
+        }
+        .line-height-range::-moz-range-thumb {
+            width: 10px;
+            height: 10px;
+            border: 2px solid #ffffff;
+            border-radius: 9999px;
+            background: #6366f1;
+            box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
+        }
+        .dark .line-height-range::-webkit-slider-runnable-track {
+            background: #475569;
+        }
+        .dark .line-height-range::-moz-range-track {
+            background: #475569;
+        }
+        .dark .line-height-range::-webkit-slider-thumb {
+            border-color: #1e293b;
+            background: #818cf8;
+        }
+        .dark .line-height-range::-moz-range-thumb {
+            border-color: #1e293b;
+            background: #818cf8;
+        }
+        .line-height-range:focus-visible {
+            outline: none;
+        }
+        .line-height-range:focus-visible::-webkit-slider-thumb {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.20);
+        }
+        .line-height-range:focus-visible::-moz-range-thumb {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.20);
+        }
+
         /* Clean print stylesheet: hides UI and prints active text cleanly */
         @media print {
             body > *:not(#print-area) {
@@ -203,31 +366,35 @@
 
                 <!-- Modernised Font & Typography Controls inside Menu -->
                 <div class="border-t border-slate-200 dark:border-slate-700 my-1 px-3 py-2 space-y-2.5 bg-slate-50/60 dark:bg-slate-900/40">
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-[minmax(0,1fr)_72px] gap-2">
                         <div>
                             <label class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-1">Font Family</label>
-                            <select id="menu-font-family" onchange="changeFontFamily(this.value)" class="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-100 shadow-2xs cursor-pointer">
+                            <div class="font-select-wrap">
+                            <select id="menu-font-family" onchange="changeFontFamily(this.value)" class="font-select">
                                 <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
                                 <option value="'Fira Code', monospace">Fira Code</option>
                                 <option value="Consolas, monospace">Consolas</option>
                                 <option value="'Courier New', monospace">Courier New</option>
-                                <option value="'Inter', sans-serif">Inter (Sans)</option>
+                                <option value="'Inter', sans-serif">Inter</option>
                                 <option value="Arial, sans-serif">Arial</option>
-                                <option value="Georgia, serif">Georgia (Serif)</option>
+                                <option value="Georgia, serif">Georgia</option>
                             </select>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-1">Font Size</label>
-                            <select id="menu-font-size" onchange="changeFontSize(this.value)" class="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-100 shadow-2xs cursor-pointer">
-                                <option value="11">11 px</option>
-                                <option value="12">12 px</option>
-                                <option value="14" selected>14 px</option>
-                                <option value="16">16 px</option>
-                                <option value="18">18 px</option>
-                                <option value="20">20 px</option>
-                                <option value="24">24 px</option>
-                                <option value="28">28 px</option>
+                            <div class="font-select-wrap">
+                            <select id="menu-font-size" onchange="changeFontSize(this.value)" class="font-select font-mono">
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="14" selected>14</option>
+                                <option value="16">16</option>
+                                <option value="18">18</option>
+                                <option value="20">20</option>
+                                <option value="24">24</option>
+                                <option value="28">28</option>
                             </select>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -235,7 +402,7 @@
                             <span>Line Spacing</span>
                             <span id="line-height-display" class="font-mono text-indigo-600 dark:text-indigo-400">1.6</span>
                         </div>
-                        <input type="range" min="1.2" max="2.4" step="0.1" value="1.6" oninput="changeLineHeight(this.value)" class="w-full accent-indigo-600 dark:accent-indigo-500 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+                        <input type="range" min="1.2" max="2.4" step="0.1" value="1.6" oninput="changeLineHeight(this.value)" class="line-height-range" aria-label="Line spacing">
                     </div>
                 </div>
 
@@ -378,8 +545,9 @@
         </div>
 
         <!-- Modernised Typography Quick Selectors -->
-        <div class="flex items-center gap-1.5 bg-white dark:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
-            <select id="quick-font-family" onchange="changeFontFamily(this.value)" title="Font Family" class="text-xs bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 cursor-pointer">
+        <div class="flex items-center gap-1.5 bg-white dark:bg-slate-800/80 px-1.5 py-0.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+            <div class="font-select-wrap">
+            <select id="quick-font-family" onchange="changeFontFamily(this.value)" title="Font Family" class="font-select min-w-[132px]">
                 <option value="'JetBrains Mono', monospace" class="dark:bg-slate-800">JetBrains Mono</option>
                 <option value="'Fira Code', monospace" class="dark:bg-slate-800">Fira Code</option>
                 <option value="Consolas, monospace" class="dark:bg-slate-800">Consolas</option>
@@ -388,8 +556,10 @@
                 <option value="Arial, sans-serif" class="dark:bg-slate-800">Arial</option>
                 <option value="Georgia, serif" class="dark:bg-slate-800">Georgia</option>
             </select>
+            </div>
             <div class="h-3.5 w-px bg-slate-200 dark:bg-slate-700"></div>
-            <select id="quick-font-size" onchange="changeFontSize(this.value)" title="Font Size" class="text-xs bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 cursor-pointer font-mono">
+            <div class="font-select-wrap">
+            <select id="quick-font-size" onchange="changeFontSize(this.value)" title="Font Size" class="font-select min-w-[66px] font-mono">
                 <option value="11" class="dark:bg-slate-800">11</option>
                 <option value="12" class="dark:bg-slate-800">12</option>
                 <option value="14" selected class="dark:bg-slate-800">14</option>
@@ -399,6 +569,7 @@
                 <option value="24" class="dark:bg-slate-800">24</option>
                 <option value="28" class="dark:bg-slate-800">28</option>
             </select>
+            </div>
         </div>
 
         <div class="flex items-center gap-0.5 bg-white dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
@@ -735,6 +906,8 @@
             isDirty = false;
             undoHistory = [{ content: '', selectionStart: 0, selectionEnd: 0 }];
             historyIndex = 0;
+            closeAllMenus();
+            closeFindPopup();
             syncDocumentIdentityUI();
             updateStatus();
             editor.focus();
@@ -964,17 +1137,23 @@
         function execEditorCommand(cmd) {
             editor.focus();
             document.execCommand(cmd);
-            handleEditorInput();
+            if (cmd === 'cut') handleEditorInput();
         }
 
         function handlePaste() {
             editor.focus();
+            if (!navigator.clipboard || !navigator.clipboard.readText) {
+                if (document.execCommand('paste')) handleEditorInput();
+                return;
+            }
             navigator.clipboard.readText().then(clipText => {
                 const start = editor.selectionStart;
                 const end = editor.selectionEnd;
                 editor.setRangeText(clipText, start, end, 'end');
                 handleEditorInput();
-            }).catch(() => {});
+            }).catch(() => {
+                if (document.execCommand('paste')) handleEditorInput();
+            });
         }
 
         function selectAllText() {
@@ -1018,9 +1197,9 @@
         }
 
         function changeFontSize(size) {
-            editor.style.fontSize = `${size}px`;
             document.getElementById('menu-font-size').value = size;
             document.getElementById('quick-font-size').value = size;
+            applyZoom();
         }
 
         function changeLineHeight(val) {
@@ -1066,7 +1245,7 @@
                     return line.replace(/^ {1,3}/, '');
                 }
             });
-            editor.setRangeText(updatedLines.join('\n'), lineStart, lineEnd, 'select');
+            editor.setRangeText(updatedLines.join('\n'), lineStart, lineEnd, 'end');
             handleEditorInput();
         }
 
@@ -1078,9 +1257,19 @@
             const updatedLines = lines.map((line, idx) => {
                 if (type === 'bullet') return line.startsWith('• ') ? line.substring(2) : `• ${line}`;
                 else if (type === 'number') return /^\d+\.\s/.test(line) ? line.replace(/^\d+\.\s/, '') : `${idx + 1}. ${line}`;
+                else if (type === 'quote') return line.startsWith('> ') ? line.substring(2) : `> ${line}`;
                 return line;
             });
-            editor.setRangeText(updatedLines.join('\n'), lineStart, lineEnd, 'select');
+            editor.setRangeText(updatedLines.join('\n'), lineStart, lineEnd, 'end');
+            if (type === 'quote' && editor.selectionStart === editor.selectionEnd) {
+                const currentLineStart = editor.value.lastIndexOf('\n', editor.selectionStart - 1) + 1;
+                const nextLineEnd = editor.value.indexOf('\n', currentLineStart);
+                const lineEndForCaret = nextLineEnd === -1 ? editor.value.length : nextLineEnd;
+                const currentLine = editor.value.substring(currentLineStart, lineEndForCaret);
+                const prefixLength = currentLine.startsWith('> ') ? 2 : 0;
+                const caretPosition = prefixLength ? currentLineStart + prefixLength : currentLineStart;
+                editor.setSelectionRange(caretPosition, caretPosition);
+            }
             handleEditorInput();
         }
 
@@ -1373,6 +1562,10 @@
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (e.key === 'Escape') {
+                const unsavedModal = document.getElementById('unsaved-modal');
+                if (!unsavedModal.classList.contains('hidden')) {
+                    resolveUnsavedModal('cancel');
+                }
                 closeAllMenus();
                 closeFindPopup();
                 closeGoToModal();
