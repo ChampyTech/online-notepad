@@ -142,6 +142,131 @@
             }
         }
 
+        .editor-highlight-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            overflow: hidden;
+            pointer-events: none;
+            color: transparent;
+        }
+        .editor-highlight-content {
+            position: absolute;
+            inset: 0;
+            padding: 1rem 1.5rem;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            word-break: normal;
+            color: transparent;
+        }
+        .search-match-highlight {
+            border-radius: 3px;
+            background: rgba(250, 204, 21, 0.48);
+            color: transparent;
+        }
+        .search-match-highlight.current {
+            background: rgba(99, 102, 241, 0.48);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.55);
+        }
+        .dark .search-match-highlight {
+            background: rgba(250, 204, 21, 0.30);
+        }
+        .dark .search-match-highlight.current {
+            background: rgba(129, 140, 248, 0.42);
+            box-shadow: 0 0 0 1px rgba(165, 180, 252, 0.50);
+        }
+        #editor {
+            position: relative;
+            z-index: 3;
+            background: transparent !important;
+        }
+        #editor-shell {
+            isolation: isolate;
+        }
+        #editor-drop-overlay {
+            position: absolute;
+            inset: 10px;
+            z-index: 20;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #818cf8;
+            border-radius: 12px;
+            background: rgba(238, 242, 255, 0.92);
+            color: #4f46e5;
+            font-size: 0.75rem;
+            font-weight: 600;
+            pointer-events: none;
+        }
+        .dark #editor-drop-overlay {
+            background: rgba(30, 41, 59, 0.94);
+            color: #a5b4fc;
+        }
+        #editor-shell.dragging #editor-drop-overlay {
+            display: flex;
+        }
+        #context-menu {
+            position: fixed;
+            z-index: 80;
+            width: 15rem;
+            animation: menu-enter 120ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .skip-link {
+            position: absolute;
+            left: 8px;
+            top: -48px;
+            z-index: 100;
+            border-radius: 6px;
+            background: #4f46e5;
+            color: #ffffff;
+            padding: 8px 12px;
+            font-size: 12px;
+            transition: top 120ms ease;
+        }
+        .skip-link:focus {
+            top: 8px;
+        }
+
+        @media (max-width: 640px) {
+            #menu-bar {
+                overflow-x: auto;
+                white-space: nowrap;
+                scrollbar-width: thin;
+            }
+            .menu-dropdown {
+                position: fixed !important;
+                left: 8px !important;
+                right: 8px !important;
+                top: 72px !important;
+                width: auto !important;
+                max-height: calc(100vh - 88px);
+                overflow-y: auto;
+            }
+            #quick-actions-toolbar {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                scrollbar-width: thin;
+            }
+            #quick-actions-toolbar > div {
+                flex-shrink: 0;
+            }
+            #find-popup {
+                left: 8px !important;
+                right: 8px !important;
+                top: 82px !important;
+                width: auto !important;
+            }
+            #status-bar {
+                height: 30px;
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+            #selection-stats-container,
+            #status-bar .hidden.sm\:inline {
+                display: none !important;
+            }
+        }
+
         .line-height-range {
             width: 100%;
             height: 16px;
@@ -228,6 +353,7 @@
     </style>
 </head>
 <body class="h-full flex flex-col bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans overflow-hidden select-none">
+    <a href="#editor" class="skip-link">Skip to editor</a>
 
     <!-- Dedicated Print Area -->
     <div id="print-area" class="hidden"></div>
@@ -292,6 +418,19 @@
                 <button type="button" onclick="printFile(); closeAllMenus();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center justify-between">
                     <span class="flex items-center gap-2.5"><i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i> Print...</span>
                     <span class="text-[10px] text-slate-400 font-mono">Ctrl+P</span>
+                </button>
+                <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+                <button type="button" onclick="exportDocument('txt'); closeAllMenus();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center justify-between">
+                    <span class="flex items-center gap-2.5"><i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-500"></i> Export as TXT</span>
+                </button>
+                <button type="button" onclick="exportDocument('md'); closeAllMenus();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center justify-between">
+                    <span class="flex items-center gap-2.5"><i data-lucide="braces" class="w-3.5 h-3.5 text-indigo-500"></i> Export as Markdown</span>
+                </button>
+                <button type="button" onclick="exportDocument('html'); closeAllMenus();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center justify-between">
+                    <span class="flex items-center gap-2.5"><i data-lucide="code-xml" class="w-3.5 h-3.5 text-indigo-500"></i> Export as HTML</span>
+                </button>
+                <button type="button" onclick="exportDocument('pdf'); closeAllMenus();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center justify-between">
+                    <span class="flex items-center gap-2.5"><i data-lucide="file-down" class="w-3.5 h-3.5 text-slate-500"></i> Export as PDF</span>
                 </button>
             </div>
         </div>
@@ -501,7 +640,7 @@
     </nav>
 
     <!-- Quick Actions Toolbar -->
-    <div class="bg-slate-50/90 dark:bg-slate-900/75 border-b border-slate-200/80 dark:border-slate-800 px-3 py-1.5 flex flex-wrap items-center gap-1.5 shrink-0 z-20">
+    <div id="quick-actions-toolbar" class="bg-slate-50/90 dark:bg-slate-900/75 border-b border-slate-200/80 dark:border-slate-800 px-3 py-1.5 flex flex-wrap items-center gap-1.5 shrink-0 z-20">
         <div class="flex items-center gap-0.5 bg-white dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
             <button type="button" onclick="newDocument()" class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors text-slate-600 dark:text-slate-300" title="New Document (Ctrl+N)">
                 <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
@@ -605,13 +744,23 @@
 
     <!-- Main Text Editor Workspace -->
     <main class="flex-1 relative flex flex-col overflow-hidden bg-white dark:bg-slate-900">
-        <textarea id="editor" 
-            class="flex-1 w-full h-full px-6 py-4 resize-none focus:outline-none bg-white dark:bg-slate-900 whitespace-pre-wrap overflow-y-auto text-slate-800 dark:text-slate-100 selection:bg-indigo-500/20 dark:selection:bg-indigo-400/30"
-            style="font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.6;"
-            placeholder="Start typing or paste your text here..."></textarea>
+        <div id="editor-shell" class="relative flex-1 overflow-hidden bg-white dark:bg-slate-900">
+            <div id="editor-highlight-layer" class="editor-highlight-layer" aria-hidden="true">
+                <div id="editor-highlight-content" class="editor-highlight-content"></div>
+            </div>
+            <textarea id="editor"
+                aria-label="Document editor"
+                aria-describedby="editor-help"
+                spellcheck="true"
+                class="absolute inset-0 w-full h-full px-6 py-4 resize-none focus:outline-none whitespace-pre-wrap overflow-y-auto text-slate-800 dark:text-slate-100 selection:bg-indigo-500/20 dark:selection:bg-indigo-400/30"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.6;"
+                placeholder="Start typing or paste your text here..."></textarea>
+            <span id="editor-help" class="sr-only">Press Ctrl+F to search, Ctrl+H to search and replace, or F1 for the shortcut guide.</span>
+            <div id="editor-drop-overlay"><span>Drop a file to open it</span></div>
+        </div>
 
         <!-- Floating Find & Replace Popup -->
-        <div id="find-popup" class="hidden fixed top-28 right-5 w-[370px] max-w-[92vw] bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-40 overflow-hidden">
+        <div id="find-popup" role="dialog" aria-modal="false" aria-label="Find and replace" class="hidden fixed top-28 right-5 w-[370px] max-w-[92vw] bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-40 overflow-hidden">
             <div id="find-popup-header" class="bg-slate-100/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-700 px-3 py-2 flex items-center justify-between cursor-move">
                 <div class="flex items-center gap-2">
                     <button type="button" id="toggle-replace-row-btn" onclick="toggleReplaceRow()" class="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-600 dark:text-slate-300" title="Toggle Replace Field">
@@ -661,6 +810,31 @@
             </div>
         </div>
     </main>
+
+    <div id="context-menu" class="hidden w-60 text-xs bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1.5" role="menu" aria-label="Editor actions">
+        <button type="button" onclick="contextCut(); closeContextMenu();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center justify-between" role="menuitem">
+            <span class="flex items-center gap-2.5"><i data-lucide="scissors" class="w-3.5 h-3.5 text-slate-500"></i> Cut</span>
+            <span class="text-[10px] text-slate-400 font-mono">Ctrl+X</span>
+        </button>
+        <button type="button" onclick="contextCopy(); closeContextMenu();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center justify-between" role="menuitem">
+            <span class="flex items-center gap-2.5"><i data-lucide="copy" class="w-3.5 h-3.5 text-slate-500"></i> Copy</span>
+            <span class="text-[10px] text-slate-400 font-mono">Ctrl+C</span>
+        </button>
+        <button type="button" onclick="contextPaste(); closeContextMenu();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center justify-between" role="menuitem">
+            <span class="flex items-center gap-2.5"><i data-lucide="clipboard" class="w-3.5 h-3.5 text-slate-500"></i> Paste</span>
+            <span class="text-[10px] text-slate-400 font-mono">Ctrl+V</span>
+        </button>
+        <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+        <button type="button" onclick="transformTextCase('upper'); closeContextMenu();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center gap-2.5" role="menuitem">
+            <i data-lucide="arrow-up-az" class="w-3.5 h-3.5 text-indigo-500"></i> Uppercase
+        </button>
+        <button type="button" onclick="transformTextCase('lower'); closeContextMenu();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center gap-2.5" role="menuitem">
+            <i data-lucide="arrow-down-za" class="w-3.5 h-3.5 text-indigo-500"></i> Lowercase
+        </button>
+        <button type="button" onclick="transformTextCase('title'); closeContextMenu();" class="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 flex items-center gap-2.5" role="menuitem">
+            <i data-lucide="case-sensitive" class="w-3.5 h-3.5 text-indigo-500"></i> Capitalise
+        </button>
+    </div>
 
     <!-- Status Bar -->
     <footer id="status-bar" class="h-8 py-1.5 bg-slate-100 dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 px-4 flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400 shrink-0 select-none box-border overflow-hidden">
@@ -791,6 +965,15 @@
                 clean += '.txt';
             }
             return clean;
+        }
+
+        function escapeHtml(value) {
+            return value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         function syncDocumentIdentityUI() {
@@ -939,13 +1122,27 @@
 
         function closeAllMenus() {
             menuDropdowns.forEach(drop => drop.classList.add('hidden'));
-            menuTriggers.forEach(btn => btn.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-indigo-600', 'dark:text-indigo-400'));
+            menuTriggers.forEach(btn => {
+                btn.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-indigo-600', 'dark:text-indigo-400');
+                btn.setAttribute('aria-expanded', 'false');
+            });
             activeMenuId = null;
         }
 
         menuTriggers.forEach(trigger => {
+            const targetId = trigger.getAttribute('data-menu');
+            trigger.setAttribute('aria-haspopup', 'menu');
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.setAttribute('aria-controls', targetId);
+            trigger.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    trigger.click();
+                }
+            });
             trigger.addEventListener('click', (e) => {
                 e.stopPropagation();
+                closeContextMenu(false);
                 const targetId = trigger.getAttribute('data-menu');
                 const targetDropdown = document.getElementById(targetId);
 
@@ -955,7 +1152,11 @@
                     closeAllMenus();
                     targetDropdown.classList.remove('hidden');
                     trigger.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-indigo-600', 'dark:text-indigo-400');
+                    trigger.setAttribute('aria-expanded', 'true');
+                    targetDropdown.setAttribute('role', 'menu');
                     activeMenuId = targetId;
+                    const firstItem = targetDropdown.querySelector('button, select, input');
+                    if (firstItem && window.matchMedia('(max-width: 640px)').matches) firstItem.focus();
                 }
             });
         });
@@ -987,6 +1188,7 @@
             }
             pushHistory();
             updateStatus();
+            syncEditorHighlight();
             if (!document.getElementById('find-popup').classList.contains('hidden')) {
                 refreshFindMatches(false);
             }
@@ -1037,6 +1239,53 @@
         editor.addEventListener('input', handleEditorInput);
         editor.addEventListener('keyup', updateStatus);
         editor.addEventListener('mouseup', updateStatus);
+        editor.addEventListener('scroll', syncEditorHighlightScroll);
+        editor.addEventListener('contextmenu', openContextMenu);
+        document.addEventListener('click', (event) => {
+            if (!document.getElementById('context-menu').contains(event.target)) {
+                closeContextMenu(false);
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeContextMenu();
+        });
+        window.addEventListener('resize', syncEditorHighlightScroll);
+
+        const editorShell = document.getElementById('editor-shell');
+        editorShell.addEventListener('dragenter', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            editorShell.classList.add('dragging');
+        });
+        editorShell.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = 'copy';
+            editorShell.classList.add('dragging');
+        });
+        editorShell.addEventListener('dragleave', (event) => {
+            if (!editorShell.contains(event.relatedTarget)) editorShell.classList.remove('dragging');
+        });
+        editorShell.addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            editorShell.classList.remove('dragging');
+            const file = event.dataTransfer.files && event.dataTransfer.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                currentFileName = file.name;
+                editor.value = reader.result;
+                isDirty = false;
+                undoHistory = [{ content: editor.value, selectionStart: 0, selectionEnd: 0 }];
+                historyIndex = 0;
+                syncDocumentIdentityUI();
+                syncEditorHighlight();
+                updateStatus();
+                editor.focus();
+            };
+            reader.readAsText(file);
+        });
         editor.addEventListener('mousedown', () => {
             const mouseMoveHandler = () => updateStatus();
             const mouseUpHandler = () => {
@@ -1134,10 +1383,80 @@
             window.print();
         }
 
+        function exportDocument(format) {
+            let content = editor.value;
+            let extension = format;
+            let mime = 'text/plain;charset=utf-8';
+
+            if (format === 'md') {
+                extension = 'md';
+                mime = 'text/markdown;charset=utf-8';
+            } else if (format === 'html') {
+                extension = 'html';
+                mime = 'text/html;charset=utf-8';
+                content = `<!DOCTYPE html>\n<html lang="en-GB">\n<head>\n  <meta charset="UTF-8">\n  <title>${escapeHtml(currentFileName)}</title>\n</head>\n<body>\n<pre>${escapeHtml(editor.value)}</pre>\n</body>\n</html>\n`;
+            } else if (format === 'pdf') {
+                printFile();
+                return;
+            }
+
+            let baseName = normaliseFileName(currentFileName).replace(/\.[^.]+$/, '') || 'Untitled';
+            downloadExport(`${baseName}.${extension}`, content, mime);
+        }
+
+        function downloadExport(fileName, content = editor.value, mime = 'text/plain;charset=utf-8') {
+            const blob = new Blob([content], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         function execEditorCommand(cmd) {
             editor.focus();
             document.execCommand(cmd);
             if (cmd === 'cut') handleEditorInput();
+        }
+
+        function contextCut() {
+            execEditorCommand('cut');
+        }
+
+        function contextCopy() {
+            const selected = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(selected).catch(() => document.execCommand('copy'));
+            } else {
+                document.execCommand('copy');
+            }
+        }
+
+        function contextPaste() {
+            handlePaste();
+        }
+
+        function openContextMenu(event) {
+            event.preventDefault();
+            closeAllMenus();
+            const menu = document.getElementById('context-menu');
+            menu.classList.remove('hidden');
+            const menuWidth = 240;
+            const menuHeight = 218;
+            menu.style.left = `${Math.min(event.clientX, window.innerWidth - menuWidth - 8)}px`;
+            menu.style.top = `${Math.min(event.clientY, window.innerHeight - menuHeight - 8)}px`;
+            const firstItem = menu.querySelector('[role="menuitem"]');
+            if (firstItem) firstItem.focus();
+        }
+
+        function closeContextMenu(restoreFocus = true) {
+            const menu = document.getElementById('context-menu');
+            const wasOpen = !menu.classList.contains('hidden');
+            menu.classList.add('hidden');
+            if (restoreFocus && wasOpen) editor.focus();
         }
 
         function handlePaste() {
@@ -1311,6 +1630,7 @@
             document.getElementById('status-zoom').innerText = `${zoomLevel}%`;
             const baseSize = parseInt(document.getElementById('quick-font-size').value, 10) || 14;
             editor.style.fontSize = `${Math.round(baseSize * (zoomLevel / 100))}px`;
+            syncEditorHighlightStyle();
         }
 
         function toggleStatusBar() {
@@ -1318,6 +1638,40 @@
             const badge = document.getElementById('statusbar-badge');
             const isHidden = statusBar.classList.toggle('hidden');
             badge.innerText = isHidden ? 'OFF' : 'ON';
+        }
+
+        function syncEditorHighlightStyle() {
+            const highlightContent = document.getElementById('editor-highlight-content');
+            highlightContent.style.fontFamily = editor.style.fontFamily || "'JetBrains Mono', monospace";
+            highlightContent.style.fontSize = editor.style.fontSize || '14px';
+            highlightContent.style.lineHeight = editor.style.lineHeight || '1.6';
+            syncEditorHighlightScroll();
+        }
+
+        function syncEditorHighlightScroll() {
+            const highlightContent = document.getElementById('editor-highlight-content');
+            highlightContent.style.transform = `translate(${-editor.scrollLeft}px, ${-editor.scrollTop}px)`;
+        }
+
+        function syncEditorHighlight() {
+            syncEditorHighlightStyle();
+            const highlightContent = document.getElementById('editor-highlight-content');
+            const text = editor.value;
+            if (!findInput || !findInput.value || currentMatches.length === 0) {
+                highlightContent.textContent = text;
+                return;
+            }
+
+            let html = '';
+            let cursor = 0;
+            currentMatches.forEach((match, index) => {
+                html += escapeHtml(text.slice(cursor, match.start));
+                const activeClass = index === currentMatchIndex ? ' search-match-highlight current' : ' search-match-highlight';
+                html += `<mark class="${activeClass.trim()}">${escapeHtml(text.slice(match.start, match.end))}</mark>`;
+                cursor = match.end;
+            });
+            html += escapeHtml(text.slice(cursor));
+            highlightContent.innerHTML = html;
         }
 
         const findPopup = document.getElementById('find-popup');
@@ -1347,6 +1701,10 @@
 
         function closeFindPopup() {
             findPopup.classList.add('hidden');
+            findInput.value = '';
+            currentMatches = [];
+            currentMatchIndex = -1;
+            syncEditorHighlight();
             editor.focus();
         }
 
@@ -1397,6 +1755,7 @@
         function refreshFindMatches(jumpToNearest = false) {
             const query = findInput.value;
             currentMatches = computeMatches(query);
+            syncEditorHighlight();
             const counterEl = document.getElementById('find-match-counter');
             if (!query || currentMatches.length === 0) {
                 currentMatchIndex = -1;
@@ -1421,6 +1780,7 @@
             document.getElementById('find-match-counter').innerText = `${index + 1} of ${currentMatches.length}`;
             if (focusEditor) editor.focus();
             editor.setSelectionRange(match.start, match.end);
+            syncEditorHighlight();
             updateStatus();
         }
 
@@ -1561,6 +1921,28 @@
 
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
+            if (e.key === 'Tab') {
+                let activeContainer = null;
+                if (!findPopup.classList.contains('hidden')) activeContainer = findPopup;
+                if (!activeContainer) {
+                    activeContainer = document.querySelector('[id$="-modal"]:not(.hidden)');
+                }
+                if (activeContainer) {
+                    const focusable = [...activeContainer.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')]
+                        .filter(element => !element.closest('.hidden'));
+                    if (focusable.length) {
+                        const first = focusable[0];
+                        const last = focusable[focusable.length - 1];
+                        if (e.shiftKey && document.activeElement === first) {
+                            e.preventDefault();
+                            last.focus();
+                        } else if (!e.shiftKey && document.activeElement === last) {
+                            e.preventDefault();
+                            first.focus();
+                        }
+                    }
+                }
+            }
             if (e.key === 'Escape') {
                 const unsavedModal = document.getElementById('unsaved-modal');
                 if (!unsavedModal.classList.contains('hidden')) {
@@ -1611,6 +1993,7 @@
         lucide.createIcons();
         syncDocumentIdentityUI();
         updateStatus();
+        syncEditorHighlight();
         editor.focus();
     </script>
 </body>
